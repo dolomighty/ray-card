@@ -1,6 +1,8 @@
 
+
 #include <assert.h>
 #include <stdlib.h>
+#include <stdint.h>     // HEADER
 
 
 //float fast_gauss_rand( unsigned int &x ){
@@ -24,8 +26,8 @@
 
 
 
-
-float fast_gauss_rand( unsigned int &seed ){
+float fast_gauss_rand( uint32_t &seed ) // HEADER
+{
 
     // generiamo 4 random di bassa qualità (ma veloci)
     // ritorniamo la media, scalata a [-0.5,+0.5]
@@ -44,7 +46,6 @@ float fast_gauss_rand( unsigned int &seed ){
     return (r-(32767*2))    // [-32767*2,+32767*2]
         / (32767*4.0);      // [-0.5,+0.5]
 }
-
 
 
 //float fast_gauss_rand( unsigned int &seed ){

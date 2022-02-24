@@ -1,2 +1,2 @@
 #!/bin/sh
-make run
+exec xterm -e "make run 2>&1 | tee .run.out+err"

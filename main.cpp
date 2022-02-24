@@ -1,40 +1,43 @@
 
-#include <stdlib.h>
+
 #include <SDL.h>
-#include <unistd.h>
-
-
-static SDL_Renderer *renderer;
-static SDL_Texture *framebuffer;
-
-
 #include "fb-size.h"
-#include "loop.cpp"
+#include <db_init.h>
+#include <loop.h>
+#include <img_init.h>
+#include <macros.h>
 
 
-int main( int argc , char *argv[] ){ 
+
+SDL_Renderer *renderer;   // HEADER
+SDL_Texture *framebuffer; // HEADER
+
+
+
+
+
+int main( int argc , char *argv[] )   // HEADER
+{ 
   SDL_Window *win = SDL_CreateWindow( argv[0] , SDL_WINDOWPOS_UNDEFINED , SDL_WINDOWPOS_UNDEFINED 
-    , 1024 , 768 
+    , W*ZOOM , H*ZOOM
     , 0 );
 //    , SDL_WINDOW_FULLSCREEN_DESKTOP );
-  if(!win){
-    fprintf(stderr,"!win\n");
-    exit(1);
-  }
+  if(!win) FATAL("SDL_CreateWindow");
+
   renderer = SDL_CreateRenderer( win , -1 , 0 );
-  if(!renderer){
-    fprintf(stderr,"!renderer\n");
-    exit(1);
-  }
+  if(!renderer) FATAL("SDL_CreateRenderer");
+
   framebuffer = SDL_CreateTexture( renderer, SDL_PIXELFORMAT_RGB24, SDL_TEXTUREACCESS_STREAMING, W, H );
-  if(!framebuffer){
-    fprintf(stderr,"!framebuffer\n");
-    exit(1);
-  }
+  if(!framebuffer) FATAL("SDL_CreateTexture");
+
+
+  img_init();
+  db_init();
 //  if(!init()){
 //    fprintf(stderr,"!init\n");
 //    exit(1);
 //  }
+  
   loop();
   SDL_DestroyRenderer( renderer );
   SDL_DestroyWindow( win );

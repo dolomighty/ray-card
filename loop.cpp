@@ -1,15 +1,25 @@
 
-#include "M34.hpp"
+#include <SDL.h>
+#include <camera.h>
+#include <unistd.h>   // HEADER
+#include <stdlib.h>
+#include <math.h>
+#include "XYZ.h"
+#include <frame.h>
 
-M34 camera;
-int rays = 1;
+
+float secs;
+Uint32 ticks_now;
+Uint32 ticks_pre;
+int tonemap;  // HEADER
+bool bokeh;
 
 
-#include "frame.cpp"
 
 
 
-void loop(){
+void loop()   // HEADER
+{
 
   static char mouselook = 0;
   camera.identity();
@@ -23,13 +33,19 @@ void loop(){
   static char key_up = 0;
   static char key_down = 0;
 
+  secs=0;
+  ticks_now=0;
+  ticks_pre=0;
+  tonemap=2;
+  bokeh=false;
+
+
   while(1){
 
-    static Uint32 ticks_now = 0;
-    static Uint32 ticks_pre = 0;
     ticks_pre = ticks_now;
-
     ticks_now = SDL_GetTicks();
+    secs = ticks_now/1000.0;
+    
     static Uint32 look_renorm_deadline = ticks_now+3000;
     if( look_renorm_deadline < ticks_now ){
       look_renorm_deadline = ticks_now+3000;
@@ -53,10 +69,7 @@ void loop(){
 //          break;
         case SDL_KEYDOWN:
           switch(event.key.keysym.sym){
-            case SDLK_1: rays = 1;  break;
-            case SDLK_2: rays = 4;  break;
-            case SDLK_3: rays = 16; break;
-            case SDLK_4: rays = 64; break;
+            case SDLK_t: tonemap++; break;
           }
           // no break intenzionale
         case SDL_KEYUP:
@@ -76,8 +89,8 @@ void loop(){
 //             event.motion.x , event.motion.y );
           if(!mouselook)break;
           // controlli pitchyaw incrementali
-          camera.rotate_x( +event.motion.yrel*0.001 );
-          camera.rotate_z( +event.motion.xrel*0.001 );
+          camera.rotate_x( +event.motion.yrel*0.002 );
+          camera.rotate_z( +event.motion.xrel*0.002 );
           break;
         case SDL_MOUSEBUTTONDOWN:
 //          printf(
@@ -108,7 +121,7 @@ void loop(){
 
     // rettifica camera
     // il metodo di navigazione non assicura che l'asse x sia orizzontale (no twist)
-    // qui ricalcoliamo gli assi x e z
+    // qui ricalcoliamo gli assi x e z (y è il view vector)
     // x = y x up
     // z = x x y
     XYZ y = XYZ(camera.y.x,camera.y.y,camera.y.z);
@@ -132,7 +145,12 @@ void loop(){
     if(key_up   == SDL_PRESSED) move_z ++;
     if(key_down == SDL_PRESSED) move_z --;
 
-    if(move_x||move_y||move_z) camera.translate(move_x*speed_scale,move_y*speed_scale,move_z*speed_scale);
+    if(move_x||move_y||move_z) 
+      camera.translate(
+        move_x*speed_scale,
+        move_y*speed_scale,
+        move_z*speed_scale
+      );
 
 
 //    printf("cam pos %f %f %f\n"
@@ -146,4 +164,6 @@ void loop(){
     usleep( 1000 );
   }
 }    
+
+
 
