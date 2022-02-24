@@ -2,6 +2,8 @@
 #include "M34.hpp"
 
 M34 camera;
+int rays = 1;
+
 
 #include "frame.cpp"
 
@@ -18,6 +20,8 @@ void loop(){
   static char key_back = 0;
   static char key_left = 0;
   static char key_right = 0;
+  static char key_up = 0;
+  static char key_down = 0;
 
   while(1){
 
@@ -48,12 +52,21 @@ void loop(){
 //            SDL_GetKeyName(event.key.keysym.sym));
 //          break;
         case SDL_KEYDOWN:
+          switch(event.key.keysym.sym){
+            case SDLK_1: rays = 1;  break;
+            case SDLK_2: rays = 4;  break;
+            case SDLK_3: rays = 16; break;
+            case SDLK_4: rays = 64; break;
+          }
+          // no break intenzionale
         case SDL_KEYUP:
           switch(event.key.keysym.sym){
             case SDLK_w: key_fwd   = event.key.state; break;
             case SDLK_s: key_back  = event.key.state; break;
             case SDLK_a: key_left  = event.key.state; break;
             case SDLK_d: key_right = event.key.state; break;
+            case SDLK_e: key_up    = event.key.state; break;
+            case SDLK_c: key_down  = event.key.state; break;
           }
           break;
         case SDL_MOUSEMOTION:
@@ -92,17 +105,35 @@ void loop(){
       }
     }
 
-    float speed_scale = (ticks_now - ticks_pre)/100.0;
 
-    char move_y = 0;
-    if(key_fwd  == SDL_PRESSED) move_y ++;
-    if(key_back == SDL_PRESSED) move_y --;
-    if(move_y) camera.translate(0,move_y*speed_scale,0);
+    // rettifica camera
+    // il metodo di navigazione non assicura che l'asse x sia orizzontale (no twist)
+    // qui ricalcoliamo gli assi x e z
+    // x = y x up
+    // z = x x y
+    XYZ y = XYZ(camera.y.x,camera.y.y,camera.y.z);
+    XYZ x = !(y ^ XYZ(0,0,1));
+    camera.x.x = x.x; camera.x.y = x.y; camera.x.z = x.z;
+    XYZ z = x ^ y; // non serve normalizzare, x e y sono unitari e perpendicolari
+    camera.z.x = z.x; camera.z.y = z.y; camera.z.z = z.z;
+
+
+    float speed_scale = (ticks_now - ticks_pre)/100.0;
 
     char move_x = 0;
     if(key_right == SDL_PRESSED) move_x ++;
     if(key_left  == SDL_PRESSED) move_x --;
-    if(move_x) camera.translate(move_x*speed_scale,0,0);
+
+    char move_y = 0;
+    if(key_fwd  == SDL_PRESSED) move_y ++;
+    if(key_back == SDL_PRESSED) move_y --;
+
+    char move_z = 0;
+    if(key_up   == SDL_PRESSED) move_z ++;
+    if(key_down == SDL_PRESSED) move_z --;
+
+    if(move_x||move_y||move_z) camera.translate(move_x*speed_scale,move_y*speed_scale,move_z*speed_scale);
+
 
 //    printf("cam pos %f %f %f\n"
 //      ,camera.row[0].col[3]
