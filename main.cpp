@@ -13,7 +13,10 @@ static SDL_Texture *framebuffer;
 
 
 int main( int argc , char *argv[] ){ 
-  SDL_Window *win = SDL_CreateWindow( argv[0] , SDL_WINDOWPOS_UNDEFINED , SDL_WINDOWPOS_UNDEFINED , 1024 , 768 , 0 );
+  SDL_Window *win = SDL_CreateWindow( argv[0] , SDL_WINDOWPOS_UNDEFINED , SDL_WINDOWPOS_UNDEFINED 
+    , 1024 , 768 
+    , 0 );
+//    , SDL_WINDOW_FULLSCREEN_DESKTOP );
   if(!win){
     fprintf(stderr,"!win\n");
     exit(1);
